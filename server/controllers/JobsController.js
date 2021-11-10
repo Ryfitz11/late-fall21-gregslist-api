@@ -1,15 +1,15 @@
 import { Auth0Provider } from '@bcwdev/auth0provider'
-
-import { housesService } from '../services/HousesService'
+import { jobsService } from '../services/JobsService'
 import BaseController from '../utils/BaseController'
 
-export class HousesController extends BaseController {
+export class JobsController extends BaseController {
   constructor() {
-    super('api/houses')
+    super('api/jobs')
     this.router
       .get('', this.getAll)
       .get('/:id', this.getById)
-      // .post('', this.create)
+      // you cant do this unless you are logged in
+      // GateKeeper: All things beyond this point must be logged in
       .use(Auth0Provider.getAuthorizedUserInfo)
       .post('', this.create)
       .put('/:id', this.edit)
@@ -18,9 +18,11 @@ export class HousesController extends BaseController {
 
   async getAll(req, res, next) {
     try {
+      // capture the data from the query
       const query = req.query
-      const houses = await housesService.getAll(query)
-      return res.send(houses)
+      // send to the service
+      const jobs = await jobsService.getAll(query)
+      return res.send(jobs)
     } catch (error) {
       next(error)
     }
@@ -28,8 +30,8 @@ export class HousesController extends BaseController {
 
   async getById(req, res, next) {
     try {
-      const house = await housesService.getById(req.params.id)
-      return res.send(house)
+      const job = await jobsService.getById(req.params.id)
+      return res.send(job)
     } catch (error) {
       next(error)
     }
@@ -37,9 +39,11 @@ export class HousesController extends BaseController {
 
   async create(req, res, next) {
     try {
+      // NEVER TRUST THE CLIENT TO TELL YOU WHO THEY ARE
+      // req.userInfo is the creds validated by auth0 token
       req.body.creatorId = req.userInfo.id
-      const house = await housesService.create(req.body)
-      return res.send(house)
+      const job = await jobsService.create(req.body)
+      return res.send(job)
     } catch (error) {
       next(error)
     }
@@ -47,10 +51,12 @@ export class HousesController extends BaseController {
 
   async edit(req, res, next) {
     try {
+      // DONT TRUST THE USER
       req.body.creatorId = req.userInfo.id
+      // attach the id incase its not there
       req.body.id = req.params.id
-      const house = await housesService.edit(req.body)
-      return res.send(house)
+      const job = await jobsService.edit(req.body)
+      return res.send(job)
     } catch (error) {
       next(error)
     }
@@ -59,9 +65,9 @@ export class HousesController extends BaseController {
   async remove(req, res, next) {
     try {
       const userId = req.userInfo.id
-      const houseId = req.params.id
-      await housesService.remove(houseId, userId)
-      res.send('deleted')
+      const jobId = req.params.id
+      await jobsService.remove(jobId, userId)
+      res.send('Successfully Deleted')
     } catch (error) {
       next(error)
     }

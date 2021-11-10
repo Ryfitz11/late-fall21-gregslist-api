@@ -3,7 +3,7 @@ import { BadRequest, Forbidden } from '../utils/Errors'
 
 class HousesService {
   async getAll(query = {}) {
-    const houses = await dbContext.Houses.find(query).populate('creator', '')
+    const houses = await dbContext.Houses.find(query).populate('creator')
     return houses
   }
 
